@@ -13,7 +13,7 @@ def insert(table: str, column_values: Dict):
     values = [tuple(column_values.values())]
     placeholders = ", ".join( "?" * len(column_values.keys()) )
     cursor.executemany(
-        f"INSERT INTO {table} "
+        f"INSERT OR REPLACE INTO {table} "
         f"({columns}) "
         f"VALUES ({placeholders})",
         values)

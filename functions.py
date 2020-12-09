@@ -1,9 +1,12 @@
 import asyncio
+import datetime
 import logging
 import os
 
 from aiogram import Bot, Dispatcher, types, md
 from aiogram.utils import exceptions
+
+import db
 
 
 API_TOKEN = os.getenv("TELEGRAM_API_TOKEN")
@@ -13,6 +16,35 @@ log = logging.getLogger(__name__)
 
 bot = Bot(token=API_TOKEN, parse_mode=types.ParseMode.MARKDOWN)
 
+
+async def save_new_user(id: int, data: dict, message: types.Message):
+    try:
+        db.insert("users", {
+            "id": id,
+            "name": data['name'],
+            "age": data['age'],
+            "gender": data['gender'],
+            "lang": check_language(message),
+            "created": _get_now_formatted()
+        })
+    except Exception as Argument:
+        log.exception(f"Savind [ID:{id}]: error")
+    else:
+        log.info(f"Savind [ID:{id}]: success")
+        await bot.send_message(
+            message.chat.id,
+            "Saved"
+        )
+
+
+
+def _get_now_formatted() -> str:
+    """Возвращает сегодняшнюю дату строкой"""
+    return datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+
+def check_language(message: types.Message) -> str:
+    return message.from_user.locale.language
 
 def get_users():
     """

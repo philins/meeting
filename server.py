@@ -11,7 +11,7 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.types import ParseMode
 from aiogram.utils import exceptions, executor
 
-import func
+from functions import broadcaster, save_new_user
 
 
 API_TOKEN = os.getenv("TELEGRAM_API_TOKEN")
@@ -29,14 +29,13 @@ async def send_welcome(message: types.Message):
     """
     This handler will be called when user sends `/start` or `/help` command
     """
-    lang = check_language(message)
-    await message.answer("Hi!\nI'm EchoBot!\nPowered by aiogram.{lang}".format(lang=message.from_user.first_name))
+    await message.answer("Hi!\nDo you want some sex, {username}?".format(username=message.from_user.first_name))
 
 
 @dp.message_handler(state='*', commands=['today'])
 async def today_statistics(message: types.Message, state: FSMContext):
     """Отправляет сегодняшнюю статистику трат"""
-    answer_message = await func.broadcaster()
+    answer_message = await broadcaster()
     log.info(f"{answer_message} today statistic.")
     async with state.proxy() as proxy:
         await message.answer(f' {proxy}')
@@ -52,10 +51,6 @@ async def view_log(message: types.Message, state: FSMContext):
             message.chat.id,
             log_text
         )
-
-
-def check_language(message: types.Message) -> str:
-    return message.from_user.locale.language
 
 
 # States
@@ -168,6 +163,8 @@ async def process_gender(message: types.Message, state: FSMContext):
             reply_markup=markup,
             parse_mode=ParseMode.MARKDOWN,
         )
+        await save_new_user(message.from_user.id, data, message)
+
 
     # Finish conversation
     #await state.finish()
