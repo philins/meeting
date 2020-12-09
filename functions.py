@@ -17,6 +17,18 @@ log = logging.getLogger(__name__)
 bot = Bot(token=API_TOKEN, parse_mode=types.ParseMode.MARKDOWN)
 
 
+def get_total_users():
+    out = {}
+    cursor = db.get_cursor()
+    cursor.execute("SELECT count(*) FROM users")
+    out['Total'] = cursor.fetchone()[0]
+    cursor.execute("SELECT count(*) FROM users WHERE gender='Male'")
+    out['Male'] = cursor.fetchone()[0]
+    cursor.execute("SELECT count(*) FROM users WHERE gender='Female'")
+    out['Female'] = cursor.fetchone()[0]
+    return out
+
+
 async def save_new_user(id: int, data: dict, message: types.Message):
     try:
         db.insert("users", {

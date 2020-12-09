@@ -11,7 +11,7 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.types import ParseMode
 from aiogram.utils import exceptions, executor
 
-from functions import broadcaster, save_new_user
+from functions import broadcaster, save_new_user, get_total_users
 
 
 API_TOKEN = os.getenv("TELEGRAM_API_TOKEN")
@@ -24,12 +24,27 @@ storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
 
 
-@dp.message_handler(commands=['start', 'help'])
+@dp.message_handler(state='*', commands=['start', 'help'])
 async def send_welcome(message: types.Message):
     """
     This handler will be called when user sends `/start` or `/help` command
     """
     await message.answer("Hi!\nDo you want some sex, {username}?".format(username=message.from_user.first_name))
+
+
+@dp.message_handler(state='*', commands=['stat'])
+async def send_welcome(message: types.Message):
+    """
+    Show statistic
+    """
+    total_users = get_total_users()
+    await message.answer(md.text(
+        md.text(md.bold('Count of users')),
+        md.text('Total:', total_users['Total']),
+        md.text('Male:', total_users['Male']),
+        md.text('Female:', total_users['Female']),
+        sep='\n',
+    ))
 
 
 @dp.message_handler(state='*', commands=['today'])
