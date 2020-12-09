@@ -17,14 +17,24 @@ log = logging.getLogger(__name__)
 bot = Bot(token=API_TOKEN, parse_mode=types.ParseMode.MARKDOWN)
 
 
+def select_companion(user_id: int):
+    cursor = db.get_cursor()
+    cursor.execute("SELECT * FROM users WHERE id!=? ORDER BY RANDOM() LIMIT 1;", (user_id,))
+    companion = cursor.fetchone()
+    if companion:
+        log.info(f"Companion [ID:{companion[0]}]: found")
+        db.set_companion(user_id, companion[0])
+        return companion
+    return False
+
 def get_total_users():
     out = {}
     cursor = db.get_cursor()
-    cursor.execute("SELECT count(*) FROM users")
+    cursor.execute("SELECT count(*) FROM users;")
     out['Total'] = cursor.fetchone()[0]
-    cursor.execute("SELECT count(*) FROM users WHERE gender='Male'")
+    cursor.execute("SELECT count(*) FROM users WHERE gender='Male';")
     out['Male'] = cursor.fetchone()[0]
-    cursor.execute("SELECT count(*) FROM users WHERE gender='Female'")
+    cursor.execute("SELECT count(*) FROM users WHERE gender='Female';")
     out['Female'] = cursor.fetchone()[0]
     return out
 

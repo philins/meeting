@@ -11,7 +11,7 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.types import ParseMode
 from aiogram.utils import exceptions, executor
 
-from functions import broadcaster, save_new_user, get_total_users
+from functions import broadcaster, save_new_user, get_total_users, select_companion
 
 
 API_TOKEN = os.getenv("TELEGRAM_API_TOKEN")
@@ -24,15 +24,29 @@ storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
 
 
-@dp.message_handler(state='*', commands=['start', 'help'])
+@dp.message_handler(commands=['start', 'help'])
 async def send_welcome(message: types.Message):
     """
     This handler will be called when user sends `/start` or `/help` command
     """
-    await message.answer("Hi!\nDo you want some sex, {username}?".format(username=message.from_user.first_name))
+    await message.answer("Hi!\nDo you want some sex, {username}?"
+        .format(username=message.from_user.first_name))
 
 
-@dp.message_handler(state='*', commands=['stat'])
+@dp.message_handler(commands=['go'])
+async def send_welcome(message: types.Message):
+    """
+    Select companion
+    """
+    companion = select_companion(message.from_user.id)
+    if companion:
+        await message.answer("We found for you: {name}, {age} years old, {gender}, {lang}"
+            .format(name=companion[1],age=companion[2],gender=companion[3],lang=companion[4]))
+    else:
+        await message.answer("Companion not found")
+
+
+@dp.message_handler(commands=['stat'])
 async def send_welcome(message: types.Message):
     """
     Show statistic
@@ -47,7 +61,7 @@ async def send_welcome(message: types.Message):
     ))
 
 
-@dp.message_handler(state='*', commands=['today'])
+@dp.message_handler(commands=['today'])
 async def today_statistics(message: types.Message, state: FSMContext):
     """Отправляет сегодняшнюю статистику трат"""
     answer_message = await broadcaster()
@@ -79,7 +93,7 @@ class Form(StatesGroup):
 @dp.message_handler(commands='new')
 async def cmd_start(message: types.Message):
     """
-    Conversation's entry point
+    Add or edit personal info
     """
     # Set state
     await Form.name.set()
@@ -166,7 +180,6 @@ async def process_gender(message: types.Message, state: FSMContext):
         # Remove keyboard
         markup = types.ReplyKeyboardRemove()
 
-        # And send message
         await bot.send_message(
             message.chat.id,
             md.text(
@@ -182,9 +195,8 @@ async def process_gender(message: types.Message, state: FSMContext):
 
 
     # Finish conversation
-    #await state.finish()
+    await state.finish()
 
 
 if __name__ == '__main__':
-    # Execute broadcaster
     executor.start_polling(dp, skip_updates=True)

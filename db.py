@@ -8,6 +8,14 @@ conn = sqlite3.connect(os.path.join("db", "meeting.db"))
 cursor = conn.cursor()
 
 
+def set_companion(user_id, companion_id):
+    cursor.execute(
+        "UPDATE users "
+        f"SET companion_id={companion_id} "
+        f"WHERE id={user_id};")
+    conn.commit()
+
+
 def insert(table: str, column_values: Dict):
     columns = ', '.join( column_values.keys() )
     values = [tuple(column_values.values())]

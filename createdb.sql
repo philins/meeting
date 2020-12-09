@@ -3,8 +3,8 @@ create table users(
   name varchar(255),
   age integer,
 	gender varchar(15),
-	lang varchar(7),
+	lang varchar(15),
 	is_banned boolean,
   created datetime,
-	chat_now integer
+	companion_id integer
 );
