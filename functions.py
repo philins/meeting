@@ -17,13 +17,27 @@ log = logging.getLogger(__name__)
 bot = Bot(token=API_TOKEN, parse_mode=types.ParseMode.MARKDOWN)
 
 
-def select_companion(user_id: int):
+async def select_companion(user_id: int):
     cursor = db.get_cursor()
-    cursor.execute("SELECT * FROM users WHERE id!=? ORDER BY RANDOM() LIMIT 1;", (user_id,))
+    cursor.execute("""
+        SELECT * FROM users
+        WHERE id!=?
+        AND companion_id is null
+        ORDER BY RANDOM()
+        LIMIT 1;""", (user_id,))
     companion = cursor.fetchone()
     if companion:
         log.info(f"Companion [ID:{companion[0]}]: found")
         db.set_companion(user_id, companion[0])
+        db.set_companion(companion[0], user_id)
+        cursor.execute("""
+            SELECT * FROM users
+            WHERE id=?
+            LIMIT 1;""", (user_id,))
+        user = cursor.fetchone()
+        msg = "{name}, {age} years old, {gender}, {lang} want to talk with you"\
+            .format(name=user[1],age=user[2],gender=user[3],lang=user[4])
+        await send_message(companion[0], msg)
         return companion
     return False
 

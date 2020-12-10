@@ -38,7 +38,7 @@ async def send_welcome(message: types.Message):
     """
     Select companion
     """
-    companion = select_companion(message.from_user.id)
+    companion = await select_companion(message.from_user.id)
     if companion:
         await message.answer("We found for you: {name}, {age} years old, {gender}, {lang}"
             .format(name=companion[1],age=companion[2],gender=companion[3],lang=companion[4]))
