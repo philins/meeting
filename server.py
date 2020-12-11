@@ -11,7 +11,7 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.types import ParseMode
 from aiogram.utils import exceptions, executor
 
-from functions import broadcaster, save_new_user, get_total_users, select_companion
+from functions import save_new_user, get_total_users, select_companion
 
 
 API_TOKEN = os.getenv("TELEGRAM_API_TOKEN")
@@ -69,9 +69,11 @@ async def today_statistics(message: types.Message, state: FSMContext):
     async with state.proxy() as proxy:
         await message.answer(f' {proxy}')
 
+
 @dp.message_handler(state='*', commands=['log'])
 async def view_log(message: types.Message, state: FSMContext):
     """
+    LOG
     Отправляет log file
     """
     async with aiofiles.open("bot.log", "r") as f:

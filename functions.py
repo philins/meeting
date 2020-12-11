@@ -37,7 +37,7 @@ async def select_companion(user_id: int):
         user = cursor.fetchone()
         msg = "{name}, {age} years old, {gender}, {lang} want to talk with you"\
             .format(name=user[1],age=user[2],gender=user[3],lang=user[4])
-        await send_message(companion[0], msg)
+        await send_message(companion[0], msg, True)
         return companion
     return False
 
@@ -82,12 +82,6 @@ def _get_now_formatted() -> str:
 def check_language(message: types.Message) -> str:
     return message.from_user.locale.language
 
-def get_users():
-    """
-    Return users list
-    In this example returns some random ID's
-    """
-    yield from (114012108, 123456789)
 
 async def send_message(user_id: int, text: str, disable_notification: bool = False) -> bool:
     """
@@ -115,20 +109,3 @@ async def send_message(user_id: int, text: str, disable_notification: bool = Fal
         log.info(f"Target [ID:{user_id}]: success")
         return True
     return False
-
-
-async def broadcaster() -> int:
-    """
-    Simple broadcaster
-    :return: Count of messages
-    """
-    count = 0
-    try:
-        for user_id in get_users():
-            if await send_message(user_id, '<b>Hello!</b>'):
-                count += 1
-            await asyncio.sleep(.05)  # 20 messages per second (Limit: 30 messages per second)
-    finally:
-        log.info(f"{count} messages successful sent.")
-
-    return count
