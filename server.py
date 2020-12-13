@@ -26,6 +26,11 @@ WEBHOOK_URL = f"{WEBHOOK_HOST}{WEBHOOK_PATH}"
 WEBAPP_HOST = 'localhost'  # or ip
 WEBAPP_PORT = 8443
 
+# This options needed if you use self-signed SSL certificate
+# Instructions: https://core.telegram.org/bots/self-signed
+WEBHOOK_SSL_CERT = './url_cert.pem'  # Path to the ssl certificate
+WEBHOOK_SSL_PRIV = './url_private.key'  # Path to the ssl private key
+
 logging.basicConfig(filename="bot.log", level=logging.INFO)
 log = logging.getLogger(__name__)
 
