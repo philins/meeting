@@ -1,7 +1,11 @@
+#!/home/philins/meeting/botenv8/bin/python
+# -*- coding: utf-8 -*-
+
 import asyncio
 import aiofiles
 import logging
 import os
+import ssl
 
 from aiogram import Bot, Dispatcher, types, md
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
@@ -19,17 +23,19 @@ API_TOKEN = os.getenv("TELEGRAM_API_TOKEN")
 
 # webhook settings
 WEBHOOK_HOST = 'https://62.109.29.107'
-WEBHOOK_PATH = '/'
+WEBHOOK_PATH = f'/{API_TOKEN}/'
 WEBHOOK_URL = f"{WEBHOOK_HOST}{WEBHOOK_PATH}"
 
 # webserver settings
-WEBAPP_HOST = 'localhost'  # or ip
+WEBAPP_HOST = '0.0.0.0'  # or ip
 WEBAPP_PORT = 8443
 
 # This options needed if you use self-signed SSL certificate
 # Instructions: https://core.telegram.org/bots/self-signed
-WEBHOOK_SSL_CERT = './url_cert.pem'  # Path to the ssl certificate
-WEBHOOK_SSL_PRIV = './url_private.key'  # Path to the ssl private key
+WEBHOOK_SSL_CERT = 'url_cert.pem'  # Path to the ssl certificate
+WEBHOOK_SSL_PRIV = 'url_private.key'  # Path to the ssl private key
+context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
+context.load_cert_chain(WEBHOOK_SSL_CERT, WEBHOOK_SSL_PRIV)
 
 logging.basicConfig(filename="bot.log", level=logging.INFO)
 log = logging.getLogger(__name__)
@@ -218,7 +224,7 @@ async def process_gender(message: types.Message, state: FSMContext):
     await state.finish()
 
 async def on_startup(dp):
-    await bot.set_webhook(WEBHOOK_URL)
+    await bot.set_webhook(url=WEBHOOK_URL, certificate=open(WEBHOOK_SSL_CERT, 'r'), max_connections=33)
     # insert code here to run it after start
 
 
@@ -247,4 +253,5 @@ if __name__ == '__main__':
         skip_updates=True,
         host=WEBAPP_HOST,
         port=WEBAPP_PORT,
+        #ssl_context=context,
     )
